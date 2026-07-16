@@ -1,0 +1,29 @@
+# Runtime and operational data
+.runtime/
+runtime/
+output/
+.playwright-cli/
+data/*.json
+data/*.sqlite
+data/backups/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.log
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+
+# Python and Node
+__pycache__/
+*.py[cod]
+.venv/
+node_modules/
+coverage/
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/

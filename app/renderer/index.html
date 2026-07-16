@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' http://127.0.0.1:* http://localhost:*;">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ProcureFlow — catálogo de compras</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Menu principal">
+      <div class="brand sidebar-brand">
+        <div class="brand-mark" aria-hidden="true">V</div>
+        <div><strong>Procure</strong><span>Flow</span></div>
+      </div>
+      <button class="sidebar-create" id="createBtn"><span aria-hidden="true">＋</span><span>Novo material</span></button>
+      <nav id="nav" class="nav-list" aria-label="Navegação principal"></nav>
+      <div class="sidebar-foot">
+        <button class="text-button" id="helpBtn">Ajuda rápida</button>
+        <small class="app-version">ProcureFlow • demonstração local</small>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <div class="top-title-wrap">
+
+          <strong id="topTitle">Buscar e registrar</strong>
+        </div>
+        <div class="topbar-actions">
+          <button class="sync-button" id="syncBtn" hidden><span aria-hidden="true">↻</span><span>Atualizar base</span></button>
+          <button class="top-action" id="helpTop">Ajuda</button>
+          <button class="top-action" id="settingsBtn">Configurações</button>
+        </div>
+      </header>
+      <section id="content" class="content" aria-live="polite"><div class="loading"><div class="spinner"></div>Organizando o catálogo...</div></section>
+    </main>
+  </div>
+  <div id="toastHost" class="toast-host" aria-live="polite" aria-atomic="true"></div>
+  <div id="modalHost"></div>
+  <script src="fflate.min.js"></script>
+  <script src="spreadsheet.js"></script>
+  <script src="catalog-importer.js"></script>
+  <script src="html5-qrcode.min.js"></script>
+  <script src="adapter.js"></script>
+  <script src="intelligence.js"></script>
+  <script src="copilot.js"></script>
+  <script src="app.js"></script>
+  <script src="enhancements.js"></script>
+</body>
+</html>
