@@ -3,7 +3,7 @@
   const APP_VERSION = "1.0.0-demo";
   const BUILD_ID = "portfolio-demo";
   console.log("Iniciando ProcureFlow v" + APP_VERSION + " [Build " + BUILD_ID + "]");
-  const Intelligence = window.VesperIntelligence;
+  const Intelligence = window.ProcureFlowIntelligence;
   Object.assign(UNIT_NAMES, { pct: "pacote", barra: "barra", bobina: "bobina", l: "litro", lt: "litro" });
   const asNumber = (value, fallback = 0) => {
     if (typeof value === "number") return Number.isFinite(value) ? value : fallback;
@@ -269,7 +269,7 @@
     if (!/\.xlsx$/i.test(file.name || "")) return toast("Use uma planilha Excel .xlsx.", "bad");
     if (Number(file.size || 0) > 50 * 1024 * 1024) return toast("A planilha é grande demais. O limite é 50 MB.", "bad");
     try {
-      const result = await window.vesper.importXlsxFile(file, state.db);
+      const result = await window.procureflow.importXlsxFile(file, state.db);
       if (result && !result.canceled) showImportPreview(result);
     } catch (error) {
       toast(error.message || "Não foi possível ler a planilha.", "bad");
@@ -286,7 +286,7 @@
     });
     zone.addEventListener("click", async () => {
       try {
-        const result = await window.vesper.importXlsx(state.db);
+        const result = await window.procureflow.importXlsx(state.db);
         if (result && !result.canceled) showImportPreview(result);
       } catch (error) { toast(error.message || "Não foi possível abrir a planilha.", "bad"); }
     });
@@ -397,9 +397,9 @@
       } catch (_) {}
       return [];
     }
-    // --- ETAPA 2: Fallback via window.vesper (modo offline/Electron) ---
+    // --- ETAPA 2: Fallback via window.procureflow (modo offline/Electron) ---
     try {
-      const direct = await window.vesper.researchProduct?.(query);
+      const direct = await window.procureflow.researchProduct?.(query);
       const internal = (direct?.candidates || [])
         .map((x) => Intelligence.normalizeCandidate(x, query))
         .filter((x) => candidateRelevantToQuery(x, query));
@@ -465,7 +465,7 @@
     const lastSupplierId = state.db.settings?.lastSupplierId || "";
     ensureCategory("Adesivos e Fitas", "Adesivos e fitas", "tape");
     const familyOptions = [...(state.db.categories || [])].sort((a, b) => a.name.localeCompare(b.name, "pt-BR")).map((c) => `<option value="${esc(c.key)}">${esc(c.name)}</option>`).join("");
-    const m = modal(`<form id="createForm150"><div class="modal-head"><div><h2>Novo material</h2><p>Digite como aparece na nota ou embalagem. O sistema separa cada informação no campo correto.</p></div><button type="button" class="modal-close" data-close>×</button></div><div class="modal-body create-layout-140 create-layout-150"><section class="create-primary"><div class="field"><label>Nome do material *</label><textarea name="name" rows="3" required placeholder="Ex.: Fita Silver Tape Scotch 3M 45 mm x 25 m">${esc(prefill)}</textarea><small>O nome ficará limpo; medidas, marca e códigos serão guardados separadamente.</small></div><div id="duplicateWarning150"></div><div class="form-grid"><div class="field"><label>Fornecedor desta compra</label><select name="supplierId">${supplierOptions(lastSupplierId)}</select><small>Quem vendeu o material. Um site do fabricante não vira fornecedor automaticamente.</small></div><div class="field"><label>Fabricante</label><input name="manufacturer" list="brandList150" placeholder="Ex.: 3M, WEG, Tigre"><datalist id="brandList150">${(state.db.brands || []).map((b) => `<option value="${esc(b.name || b)}"></option>`).join("")}</datalist></div><div class="field"><label>Marca / linha</label><input name="brand" placeholder="Ex.: Scotch, Silver Tape"></div><div class="field"><label>Categoria</label><select name="familyKey"><option value="">Detectar automaticamente</option>${familyOptions}</select></div><div class="field"><label>Código interno</label><input name="code" placeholder="Código usado pela Vesper"></div><div class="field"><label>Código do fabricante</label><input name="manufacturerCode" placeholder="MPN, modelo ou referência"></div><div class="field"><label>GTIN / EAN</label><input name="gtin" inputmode="numeric" maxlength="14" placeholder="8, 12, 13 ou 14 dígitos"></div><div class="field"><label>Como é comprado?</label><select name="unit"><option value="un">Unidade</option><option value="m">Metro</option><option value="m²">Metro quadrado</option><option value="kg">Quilo</option><option value="par">Par</option><option value="rolo">Rolo</option><option value="cx">Caixa</option><option value="pct">Pacote</option><option value="barra">Barra</option><option value="bobina">Bobina</option><option value="l">Litro</option></select><small id="unitHint150"></small></div><div class="field span-2"><label>Resumo ou aplicação — opcional</label><input name="subtitle" placeholder="Ex.: uso externo, pacote com 100, para linha de ar"></div></div><div class="spec-editor"><div class="spec-editor-head"><div><b>Especificações</b><small>Medida, liga, cor, rosca, tensão e outros dados ficam separados.</small></div><button type="button" class="button small" id="addSpec150">＋ Adicionar</button></div><div id="specRows150"></div></div><div class="recommended-action"><button type="button" class="button primary big-action" id="research150">Buscar e preencher automaticamente <span id="researchBadge150"></span></button><p>O sistema compara fontes e mostra a confiança de cada campo antes de aplicar.</p></div><button type="submit" class="button secondary-save">Cadastrar somente com estes dados</button></section><aside class="create-research" id="researchPanel150"><div class="research-placeholder"><b>Sugestões da pesquisa</b><p>Escolha o produto correto e confira campo por campo.</p></div></aside></div><div class="modal-foot"><button type="button" class="button" data-close>Cancelar</button><button type="submit" class="button primary">Salvar material</button></div></form>`, "xwide");
+    const m = modal(`<form id="createForm150"><div class="modal-head"><div><h2>Novo material</h2><p>Digite como aparece na nota ou embalagem. O sistema separa cada informação no campo correto.</p></div><button type="button" class="modal-close" data-close>×</button></div><div class="modal-body create-layout-140 create-layout-150"><section class="create-primary"><div class="field"><label>Nome do material *</label><textarea name="name" rows="3" required placeholder="Ex.: Fita Silver Tape Scotch 3M 45 mm x 25 m">${esc(prefill)}</textarea><small>O nome ficará limpo; medidas, marca e códigos serão guardados separadamente.</small></div><div id="duplicateWarning150"></div><div class="form-grid"><div class="field"><label>Fornecedor desta compra</label><select name="supplierId">${supplierOptions(lastSupplierId)}</select><small>Quem vendeu o material. Um site do fabricante não vira fornecedor automaticamente.</small></div><div class="field"><label>Fabricante</label><input name="manufacturer" list="brandList150" placeholder="Ex.: 3M, WEG, Tigre"><datalist id="brandList150">${(state.db.brands || []).map((b) => `<option value="${esc(b.name || b)}"></option>`).join("")}</datalist></div><div class="field"><label>Marca / linha</label><input name="brand" placeholder="Ex.: Scotch, Silver Tape"></div><div class="field"><label>Categoria</label><select name="familyKey"><option value="">Detectar automaticamente</option>${familyOptions}</select></div><div class="field"><label>Código interno</label><input name="code" placeholder="Código usado pela ProcureFlow"></div><div class="field"><label>Código do fabricante</label><input name="manufacturerCode" placeholder="MPN, modelo ou referência"></div><div class="field"><label>GTIN / EAN</label><input name="gtin" inputmode="numeric" maxlength="14" placeholder="8, 12, 13 ou 14 dígitos"></div><div class="field"><label>Como é comprado?</label><select name="unit"><option value="un">Unidade</option><option value="m">Metro</option><option value="m²">Metro quadrado</option><option value="kg">Quilo</option><option value="par">Par</option><option value="rolo">Rolo</option><option value="cx">Caixa</option><option value="pct">Pacote</option><option value="barra">Barra</option><option value="bobina">Bobina</option><option value="l">Litro</option></select><small id="unitHint150"></small></div><div class="field span-2"><label>Resumo ou aplicação — opcional</label><input name="subtitle" placeholder="Ex.: uso externo, pacote com 100, para linha de ar"></div></div><div class="spec-editor"><div class="spec-editor-head"><div><b>Especificações</b><small>Medida, liga, cor, rosca, tensão e outros dados ficam separados.</small></div><button type="button" class="button small" id="addSpec150">＋ Adicionar</button></div><div id="specRows150"></div></div><div class="recommended-action"><button type="button" class="button primary big-action" id="research150">Buscar e preencher automaticamente <span id="researchBadge150"></span></button><p>O sistema compara fontes e mostra a confiança de cada campo antes de aplicar.</p></div><button type="submit" class="button secondary-save">Cadastrar somente com estes dados</button></section><aside class="create-research" id="researchPanel150"><div class="research-placeholder"><b>Sugestões da pesquisa</b><p>Escolha o produto correto e confira campo por campo.</p></div></aside></div><div class="modal-foot"><button type="button" class="button" data-close>Cancelar</button><button type="submit" class="button primary">Salvar material</button></div></form>`, "xwide");
     const form = $("#createForm150", m.host), panel = $("#researchPanel150", m.host), researchButton = $("#research150", m.host), badge = $("#researchBadge150", m.host), specRoot = $("#specRows150", m.host);
     $("input[name=code]", form)?.setAttribute("placeholder", "Código interno do catálogo");
     let candidates = [], selected = null, prefetchedFor = "", timer = null, sourceEvidence = [], appliedLowConfidence = false;
@@ -957,19 +957,19 @@
     const root = $("#backupList140");
     if (!root) return;
     try {
-      const result = await window.vesper.listBackups();
+      const result = await window.procureflow.listBackups();
       const backups = Array.isArray(result) ? result : (result?.backups || []);
       root.innerHTML = backups.slice(0, 20).map((b) => `<div class="backup-row"><div><b>${esc(b.label || b.filename)}</b><small>${new Date(b.date || b.mtime || Date.now()).toLocaleString("pt-BR")} • ${readableBytes(b.sizeBytes)}</small></div><button class="button small" data-restore-file="${esc(b.filename)}">Restaurar</button>${b.manual ? `<button class="button small danger" data-delete-backup="${esc(b.filename)}">Excluir</button>` : ""}</div>`).join("") || `<p class="muted">Nenhum backup encontrado.</p>`;
       $$('[data-restore-file]', root).forEach((button) => button.onclick = async () => {
         if (!confirm(`Restaurar o backup "${button.dataset.restoreFile}"? Um backup do estado atual será criado antes.`)) return;
         try {
-          const result = await window.vesper.restoreBackupFile(button.dataset.restoreFile);
+          const result = await window.procureflow.restoreBackupFile(button.dataset.restoreFile);
           if (result?.data) { state.db = result.data; prepareDb(); toast("Backup restaurado.", "good"); renderTools(); go("catalog"); }
         } catch (error) { toast(error.message || "Não foi possível restaurar.", "bad"); }
       });
       $$('[data-delete-backup]', root).forEach((button) => button.onclick = async () => {
         if (!confirm("Excluir este backup manual?")) return;
-        try { await window.vesper.deleteBackup(button.dataset.deleteBackup); loadBackupList(); } catch (error) { toast(error.message, "bad"); }
+        try { await window.procureflow.deleteBackup(button.dataset.deleteBackup); loadBackupList(); } catch (error) { toast(error.message, "bad"); }
       });
     } catch (error) { root.innerHTML = `<div class="warning-box">Não foi possível listar os backups: ${esc(error.message || error)}</div>`; }
   }
@@ -998,14 +998,14 @@
       state.db.settings.priceAlertThreshold = t; state.db.settings.staleDays = d;
       if (await persist("Configurações salvas.")) renderTools();
     };
-    $("#backupNow140").onclick = async () => { const r = await window.vesper.createBackup(); if (!r?.canceled) { toast("Backup criado.", "good"); loadBackupList(); } };
+    $("#backupNow140").onclick = async () => { const r = await window.procureflow.createBackup(); if (!r?.canceled) { toast("Backup criado.", "good"); loadBackupList(); } };
     $("#refreshBackups140").onclick = loadBackupList;
-    $("#export140").onclick = async () => { try { const r = await window.vesper.exportXlsx(state.db); if (!r?.canceled) toast("Planilha exportada.", "good"); } catch (e) { toast(e.message, "bad"); } };
-    $("#import140").onclick = async () => { try { const r = await window.vesper.importXlsx(state.db); if (r && !r.canceled) showImportPreview(r); } catch (e) { toast(e.message, "bad"); } };
+    $("#export140").onclick = async () => { try { const r = await window.procureflow.exportXlsx(state.db); if (!r?.canceled) toast("Planilha exportada.", "good"); } catch (e) { toast(e.message, "bad"); } };
+    $("#import140").onclick = async () => { try { const r = await window.procureflow.importXlsx(state.db); if (r && !r.canceled) showImportPreview(r); } catch (e) { toast(e.message, "bad"); } };
     bindDropZone($("#settingsDrop140"));
     $("#configureStorage140").onclick = openStorageSettings;
     $("#syncNow140")?.addEventListener("click", syncData);
-    $("#reset140").onclick = async () => { if (!confirm("Restaurar a base inicial? Um backup será criado antes.")) return; await window.vesper.createAutomaticBackup?.("antes-restaurar-base"); const r = await window.vesper.resetData(); if (r?.data) { state.db = r.data; prepareDb(); go("catalog"); } };
+    $("#reset140").onclick = async () => { if (!confirm("Restaurar a base inicial? Um backup será criado antes.")) return; await window.procureflow.createAutomaticBackup?.("antes-restaurar-base"); const r = await window.procureflow.resetData(); if (r?.data) { state.db = r.data; prepareDb(); go("catalog"); } };
     $$('[data-health="stale"]').forEach((b) => b.onclick = () => { state.filters.status = "stale"; state.filtersOpen = true; go("catalog"); });
     $$('[data-health="missing"]').forEach((b) => b.onclick = () => { state.filters.status = "missing"; state.filtersOpen = true; go("catalog"); });
     $$('[data-health="fresh"]').forEach((b) => b.onclick = () => { state.filters.status = "dated"; state.filtersOpen = true; go("catalog"); });
@@ -1022,7 +1022,7 @@
     });
     loadBackupList();
     let diagData = null;
-    window.vesper.diagnostics?.().then((d) => {
+    window.procureflow.diagnostics?.().then((d) => {
       diagData = d;
       const el = $("#diagnostics140"); if (el) {
         el.innerHTML = `Revisão ${esc(d.revision ?? state.db.revision ?? 0)} • log incremental ${d.deltaLines || 0} operações (${readableBytes(d.deltaBytes)})${d.lastBackup ? ` • último backup ${new Date(d.lastBackup).toLocaleString("pt-BR")}` : ""}`;
@@ -1128,7 +1128,7 @@
   productCard = function enhancedProductCard(p) {
     let html = baseProductCard150(p);
     const q = state.query;
-    if (q && typeof VesperIntelligence !== "undefined") {
+    if (q && typeof ProcureFlowIntelligence !== "undefined") {
       const res = state.searchMeta?.get?.(p.id);
       let explanation = "";
       if (res?.matches && res.matches.length) {
@@ -1161,7 +1161,7 @@
       const o=currentOffer(p);
       let matchInfo = "";
       const q = state.query;
-      if (q && typeof VesperIntelligence !== "undefined") {
+      if (q && typeof ProcureFlowIntelligence !== "undefined") {
         const res = state.searchMeta?.get?.(p.id);
         if (res?.matches && res.matches.length) {
           matchInfo += `<div class="search-match-reasons" style="font-size:10px; color:#2e7d32; margin-top:2px;">✓ ${res.matches.join(", ")}</div>`;
@@ -1443,7 +1443,7 @@
         let bestScore = 0;
         for (const p of state.db.products) {
           if (p.archived) continue;
-          const score = VesperIntelligence.scoreProduct(p, cleanDesc).score;
+          const score = ProcureFlowIntelligence.scoreProduct(p, cleanDesc).score;
           if (score > 150 && score > bestScore) {
             bestScore = score;
             matchedProduct = p;

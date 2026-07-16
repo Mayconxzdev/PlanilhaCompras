@@ -4,7 +4,7 @@
 (function (root, factory) {
   const api = factory();
   if (typeof module === "object" && module.exports) module.exports = api;
-  root.VesperIntelligence = api;
+  root.ProcureFlowIntelligence = api;
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
   "use strict";
 

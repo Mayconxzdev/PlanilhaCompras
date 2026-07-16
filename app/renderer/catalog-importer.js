@@ -5,7 +5,7 @@
  */
 (function (root, factory) {
   if (typeof module === "object" && module.exports) module.exports = factory();
-  else root.VesperCatalogImporter = factory();
+  else root.ProcureFlowCatalogImporter = factory();
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
   "use strict";
 
@@ -627,7 +627,7 @@
       reviewItems,
       qualityIssuesDetailed,
       validation,
-      mode: legacyWorkbook ? "vesper-legacy-aligned" : "general-import",
+      mode: legacyWorkbook ? "procureflow-legacy-aligned" : "general-import",
       stats: { examinedPriceRows, aligned, unchanged, updates: updates.length, newProducts: newProducts.length, skipped: skipped.length, reviewItems: reviewItems.length }
     };
   }

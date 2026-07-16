@@ -399,7 +399,7 @@ function tokenInHay(hay, t) {
 }
 let industrialSearchCache = { query: null, revision: null, products: null, scores: new Map() };
 function productScore(p, q) {
-  if (typeof VesperIntelligence === "undefined") {
+  if (typeof ProcureFlowIntelligence === "undefined") {
     const nq = norm(q);
     if (!nq) return 1;
     return productHaystack(p).includes(nq) ? 100 : 0;
@@ -409,7 +409,7 @@ function productScore(p, q) {
   const products = state.db?.products || [];
   const revision = `${state.db?.revision ?? 0}:${products.length}`;
   if (industrialSearchCache.query !== query || industrialSearchCache.revision !== revision || industrialSearchCache.products !== products) {
-    const results = VesperIntelligence.searchProducts(products, query);
+    const results = ProcureFlowIntelligence.searchProducts(products, query);
     industrialSearchCache = { query, revision, products, scores: new Map(results.map((r, index) => [r.product.id, r.score + Math.max(0, 1000 - index)])) };
   }
   return industrialSearchCache.scores.get(p.id) || 0;
@@ -585,12 +585,12 @@ function toast(message, type = "") {
 }
 async function persist(message, opts = {}) {
   try {
-    if (typeof VesperIntelligence !== "undefined" && VesperIntelligence.invalidateAll) VesperIntelligence.invalidateAll(state.db?.products);
+    if (typeof ProcureFlowIntelligence !== "undefined" && ProcureFlowIntelligence.invalidateAll) ProcureFlowIntelligence.invalidateAll(state.db?.products);
     industrialSearchCache = { query: null, revision: null, products: null, scores: new Map() };
     state._catalogSearchCache = null;
-    if (opts.backup && window.vesper.createAutomaticBackup)
-      await window.vesper.createAutomaticBackup(opts.backup);
-    const r = await window.vesper.save(state.db);
+    if (opts.backup && window.procureflow.createAutomaticBackup)
+      await window.procureflow.createAutomaticBackup(opts.backup);
+    const r = await window.procureflow.save(state.db);
     if (r?.conflict) {
       showConflict(r.current);
       return false;
@@ -610,7 +610,7 @@ function showConflict(current) {
     `<div class="modal-head"><div><h2>Os dados mudaram em outro computador</h2><p>Para evitar perder alterações, recarregue a base compartilhada.</p></div><button class="modal-close" data-close>×</button></div><div class="modal-body"><div class="warning-box">Outra pessoa salvou uma alteração depois que esta tela foi aberta. A alteração atual não foi gravada.</div></div><div class="modal-foot"><button class="button" data-close>Cancelar</button><button class="button primary" id="reloadConflict">Recarregar dados</button></div>`,
   );
   $("#reloadConflict", m.host).onclick = async () => {
-    state.db = current || (await window.vesper.load()).data;
+    state.db = current || (await window.procureflow.load()).data;
     prepareDb();
     m.close();
     render();
@@ -674,7 +674,7 @@ function go(v) {
 function rememberProduct(id) {
   state.recent = [id, ...state.recent.filter((x) => x !== id)].slice(0, 8);
   state.db.settings.recentProductIds = state.recent;
-  window.vesper.save(state.db).catch(() => {});
+  window.procureflow.save(state.db).catch(() => {});
 }
 function externalCodes(p) {
   return (p.externalCodes || []).filter(validExternalCode).slice(0, 4);
@@ -1147,7 +1147,7 @@ function onlineResearchUrl(query) {
 }
 function openOnlineResearch(query) {
   const url = onlineResearchUrl(query);
-  if (window.vesper.openExternal) window.vesper.openExternal(url);
+  if (window.procureflow.openExternal) window.procureflow.openExternal(url);
   else window.open(url, "_blank", "noopener");
 }
 function legacyOpenCreate() {
@@ -1697,7 +1697,7 @@ function openSupplier(id) {
   const s=state.db.suppliers.find((x)=>x.id===id); if(!s)return; const r=supplierRelations(s);
   const m=modal(`<div class="modal-head"><div><h2>${esc(s.name)}</h2><p>${r.all.length} material${r.all.length===1?"":"is"} relacionado${r.all.length===1?"":"s"}</p></div><button class="modal-close" data-close>×</button></div><div class="modal-body"><div class="contact-card"><div><span>E-mail</span><b>${esc(s.email||"Não informado")}</b></div><div><span>Telefone</span><b>${esc(s.phone||"Não informado")}</b></div></div><div class="trace-section"><h3>Materiais</h3><div class="results-list">${groupProducts(r.all).slice(0,20).map(groupedCard).join("")}</div></div></div><div class="modal-foot">${s.email?'<button class="button" id="emailSupplier">Enviar e-mail</button>':""}<button class="button primary" id="filterSupplierProducts">Ver todos na busca</button></div>`,"xwide");
   $("#filterSupplierProducts",m.host).onclick=()=>{m.close();state.filters.supplier=s.id;state.filtersOpen=true;state.query="";go("catalog");};
-  $("#emailSupplier",m.host)?.addEventListener("click",()=>window.vesper.email(s.email));
+  $("#emailSupplier",m.host)?.addEventListener("click",()=>window.procureflow.email(s.email));
   $$('[data-more-variants]',m.host).forEach((b)=>b.onclick=()=>openVariants(b.dataset.moreVariants));
   bindCommonActions(m.host);
 }
@@ -1768,7 +1768,7 @@ function showImportPreview(r) {
   }
 
   const m = modal(
-    `<div class="modal-head"><div><h2>Prévia da importação</h2><p>${esc(r.fileName || r.file || "Planilha selecionada")}${p.mode === "vesper-legacy-aligned" ? " • planilha Vesper reconhecida" : ""}</p></div><button class="modal-close" data-close>×</button></div>
+    `<div class="modal-head"><div><h2>Prévia da importação</h2><p>${esc(r.fileName || r.file || "Planilha selecionada")}${p.mode === "procureflow-legacy-aligned" ? " • planilha ProcureFlow reconhecida" : ""}</p></div><button class="modal-close" data-close>×</button></div>
      <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
        <div class="metric-grid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px;">
          <div class="metric card"><span>Preços normais</span><b>${normalUpdates.length}</b></div>
@@ -2094,12 +2094,12 @@ ${storageCard()}
   $("#backSearch").onclick=()=>go("catalog"); $("#openReview").onclick=()=>go("review");
   $("#goReview2")?.addEventListener("click",()=>go("review"));
   $("#goStale")?.addEventListener("click",()=>{ state.filters.status="stale"; state.filtersOpen=true; go("catalog"); });
-  $("#backupNow").onclick=async()=>{const r=await window.vesper.createBackup();if(!r?.canceled)toast("Backup criado.","good");};
-  $("#restoreBackup").onclick=async()=>{try{const r=await window.vesper.restoreBackup();if(r?.data){state.db=r.data;prepareDb();toast("Backup restaurado.","good");render();}}catch(e){toast(e.message,"bad");}};
-  $("#exportExcel").onclick=async()=>{try{const r=await window.vesper.exportXlsx(state.db);if(!r?.canceled)toast("Arquivo exportado.","good");}catch(e){toast(e.message,"bad");}};
-  $("#importExcel").onclick=async()=>{try{const r=await window.vesper.importXlsx(state.db);if(r&&!r.canceled)showImportPreview(r);}catch(e){toast(e.message,"bad");}};
-  $("#resetBase").onclick=async()=>{const r=await window.vesper.resetData();if(r?.data){state.db=r.data;prepareDb();toast("Base inicial restaurada.","good");go("catalog");}};
-  $("#configureStorage").onclick=openStorageSettings; $("#openDataFolder")?.addEventListener("click",()=>window.vesper.openFolder(state.meta?.storage?.path||""));
+  $("#backupNow").onclick=async()=>{const r=await window.procureflow.createBackup();if(!r?.canceled)toast("Backup criado.","good");};
+  $("#restoreBackup").onclick=async()=>{try{const r=await window.procureflow.restoreBackup();if(r?.data){state.db=r.data;prepareDb();toast("Backup restaurado.","good");render();}}catch(e){toast(e.message,"bad");}};
+  $("#exportExcel").onclick=async()=>{try{const r=await window.procureflow.exportXlsx(state.db);if(!r?.canceled)toast("Arquivo exportado.","good");}catch(e){toast(e.message,"bad");}};
+  $("#importExcel").onclick=async()=>{try{const r=await window.procureflow.importXlsx(state.db);if(r&&!r.canceled)showImportPreview(r);}catch(e){toast(e.message,"bad");}};
+  $("#resetBase").onclick=async()=>{const r=await window.procureflow.resetData();if(r?.data){state.db=r.data;prepareDb();toast("Base inicial restaurada.","good");go("catalog");}};
+  $("#configureStorage").onclick=openStorageSettings; $("#openDataFolder")?.addEventListener("click",()=>window.procureflow.openFolder(state.meta?.storage?.path||""));
   // Melhoria #10A: salvar configurações de alerta
   $("#saveAlertSettings")?.addEventListener("click", async () => {
     const t = Number($("#settingThreshold").value);
@@ -2120,11 +2120,11 @@ ${storageCard()}
       if (!file || !file.name.match(/\.xlsx?$/i)) return toast("Apenas arquivos .xlsx são aceitos.", "bad");
       toast("Processando planilha...", "good");
       try {
-        const r = await window.vesper.importXlsxFile(file.path || file.name);
+        const r = await window.procureflow.importXlsxFile(file.path || file.name);
         if (r && !r.canceled) showImportPreview(r);
       } catch(e) { toast(e.message || "Erro ao importar planilha.", "bad"); }
     };
-    dropZone.onclick = async () => { try { const r=await window.vesper.importXlsx(state.db); if(r&&!r.canceled)showImportPreview(r); } catch(e){toast(e.message,"bad");} };
+    dropZone.onclick = async () => { try { const r=await window.procureflow.importXlsx(state.db); if(r&&!r.canceled)showImportPreview(r); } catch(e){toast(e.message,"bad");} };
   }
   // Melhoria #7: Merge de fornecedores duplicados
   $$("[data-merge-a]").forEach(btn => {
@@ -2147,13 +2147,13 @@ ${storageCard()}
 }
 function openStorageSettings() {
   const s = state.meta?.storage || { mode: "local" },
-    canShared = typeof window.vesper.chooseSharedFolder === "function";
+    canShared = typeof window.procureflow.chooseSharedFolder === "function";
   const m = modal(
     `<div class="modal-head"><div><h2>Armazenamento dos dados</h2><p>Escolha como os computadores da empresa usarão a base.</p></div><button class="modal-close" data-close>×</button></div><div class="modal-body"><div class="detail-grid"><div class="detail-panel"><h3>Neste computador</h3><p style="color:var(--muted)">Ideal para teste individual. Não sincroniza automaticamente com outros PCs.</p><button class="button ${s.mode === "local" ? "primary" : ""}" id="useLocal">Usar base local</button></div><div class="detail-panel"><h3>Pasta compartilhada</h3><p style="color:var(--muted)">Use uma pasta de rede, servidor ou pasta sincronizada. O aplicativo bloqueia salvamentos conflitantes.</p><button class="button ${s.mode === "shared" ? "primary" : ""}" id="chooseShared" ${canShared ? "" : "disabled"}>Escolher pasta da empresa</button></div></div>${!canShared ? '<div class="warning-box" style="margin-top:12px">A escolha de pasta compartilhada funciona na versão Electron instalada. No modo portátil do navegador, os dados ficam locais.</div>' : ""}</div><div class="modal-foot"><button class="button primary" data-close>Fechar</button></div>`,
     "wide",
   );
   $("#useLocal", m.host).onclick = async () => {
-    const r = await window.vesper.useLocalStorage();
+    const r = await window.procureflow.useLocalStorage();
     if (r?.data) state.db = r.data;
     state.meta.storage = r?.storage || { mode: "local" };
     updateStorageUi();
@@ -2162,7 +2162,7 @@ function openStorageSettings() {
     toast("Base local ativada.", "good");
   };
   $("#chooseShared", m.host).onclick = async () => {
-    const r = await window.vesper.chooseSharedFolder();
+    const r = await window.procureflow.chooseSharedFolder();
     if (r?.data) {
       state.db = r.data;
       prepareDb();
@@ -2194,7 +2194,7 @@ function exportBossCsv(rows){
   const blob = new Blob(["\ufeff"+csv], {type:"text/csv;charset=utf-8"});
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href=url; a.download=`vesper-chefia-historico-${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  a.href=url; a.download=`procureflow-chefia-historico-${new Date().toISOString().slice(0,10)}.csv`; a.click();
   setTimeout(()=>URL.revokeObjectURL(url), 500);
 }
 function renderBoss(){
@@ -2222,7 +2222,7 @@ function renderBoss(){
 
 function renderCopilot(){
   setTopTitle("Copiloto");
-  const audit=window.VesperCopilot?.auditCatalog?.(state.db) || {metrics:{},queue:[],priceAlerts:[],supplierDupes:[],supplierCoverage:[],score:0};
+  const audit=window.ProcureFlowCopilot?.auditCatalog?.(state.db) || {metrics:{},queue:[],priceAlerts:[],supplierDupes:[],supplierCoverage:[],score:0};
   const m=audit.metrics||{};
   const scoreTone=audit.score>=85?"good":audit.score>=70?"warn":"bad";
   const priceRows=(audit.priceAlerts||[]).slice(0,8).map(x=>`<tr><td><button class="linkish" data-open-product="${esc(x.product.id)}">${esc(x.product.name)}</button><small>${esc(x.product.family||"")}</small></td><td>${copilotMoney(x.previous?.finalPrice)}</td><td>${copilotMoney(x.current?.finalPrice)}</td><td><b class="${x.delta>0?'danger-text':'success-text'}">${Math.round(x.delta)}%</b></td></tr>`).join("");
@@ -2284,7 +2284,7 @@ function prepareDb() {
 }
 async function syncData(opts = {}) {
   try {
-    const r = await window.vesper.sync();
+    const r = await window.procureflow.sync();
     if (
       r?.data &&
       Number(r.data.revision || 0) > Number(state.db.revision || 0)
@@ -2300,7 +2300,7 @@ async function syncData(opts = {}) {
 }
 async function init() {
   try {
-    const loaded=await window.vesper.load();state.db=loaded.data;state.meta=loaded;prepareDb();renderNav();render();updateStorageUi(loaded.storage);
+    const loaded=await window.procureflow.load();state.db=loaded.data;state.meta=loaded;prepareDb();renderNav();render();updateStorageUi(loaded.storage);
     $("#createBtn").onclick=openCreate; $("#helpBtn").onclick=help; $("#settingsBtn").onclick=()=>go("tools"); $("#helpTop").onclick=help; $("#syncBtn").onclick=syncData;
     document.addEventListener("keydown",(e)=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();if(state.view!=="catalog")go("catalog");setTimeout(()=>$("#mainSearch")?.focus(),40);}});
     window.addEventListener("focus",()=>{if((state.meta?.storage?.mode==="shared"||state.meta?.storage?.mode==="server")&&!state.modalOpen)syncData({silent:true});});
@@ -2467,7 +2467,7 @@ function updateSupplierResults(){const root=$("#supplierResults"),heading=$("#su
 function renderSuppliers(){setTopTitle("Fornecedores");$("#content").innerHTML=`${pageHead("Fornecedores","Consulte contatos e materiais comprados de cada empresa.",'<button class="button" id="newSupplier">＋ Novo fornecedor</button>')}<div class="simple-search"><span>⌕</span><input id="supplierSearch" value="${esc(state.supplierQuery)}" placeholder="Nome, e-mail ou telefone" autocomplete="off"></div><div class="section-bar"><div><h2 id="supplierHeading"></h2><p>Fornecedores novos também podem ser criados durante uma compra.</p></div></div><div class="supplier-list" id="supplierResults"></div>`;const input=$("#supplierSearch");let timer;input.oninput=e=>{state.supplierQuery=e.target.value;clearTimeout(timer);timer=setTimeout(updateSupplierResults,100);};$("#newSupplier").onclick=openSupplierCreate;updateSupplierResults();}
 
 function extractSpecsFromResearch(text){const out=[...extractSpecsFromName(text)];String(text||"").split(/\n+/).forEach(line=>{const m=line.match(/^\s*([^:]{2,40}):\s*(.{1,100})\s*$/);if(m&&!out.some(x=>norm(x.label)===norm(m[1])))out.push({label:clean(m[1]),value:clean(m[2])});});return out.slice(0,12);}
-let cachedBackendPort = localStorage.getItem("vesper_backend_port") || "8008";
+let cachedBackendPort = localStorage.getItem("procureflow_backend_port") || "8008";
 
 async function getBackendUrl() {
   // Se estamos acessando pelo navegador diretamente na rede/servidor, o backend é a própria origem da página
@@ -2520,7 +2520,7 @@ async function getBackendUrl() {
 
   try {
     const activePort = await Promise.any(promises);
-    localStorage.setItem("vesper_backend_port", activePort);
+    localStorage.setItem("procureflow_backend_port", activePort);
     cachedBackendPort = activePort;
     return `http://127.0.0.1:${activePort}`;
   } catch (e) {
@@ -2654,7 +2654,7 @@ function openCreate(prefill=""){
     $("#webConfirmSection", m.host).style.display = "none";
     const listEl = $("#webCandidatesList", m.host);
     listEl.innerHTML = webCandidates.map((rawCandidate, i) => {
-      const c = window.VesperIntelligence?.normalizeCandidate ? window.VesperIntelligence.normalizeCandidate(rawCandidate, clean(form.elements.name.value)) : rawCandidate;
+      const c = window.ProcureFlowIntelligence?.normalizeCandidate ? window.ProcureFlowIntelligence.normalizeCandidate(rawCandidate, clean(form.elements.name.value)) : rawCandidate;
       webCandidates[i] = c;
       const { confidence, riskySource } = safeCandidateFields(c);
       const badge = sourceBadge(c);
@@ -2681,7 +2681,7 @@ function openCreate(prefill=""){
       </div>`;
     }).join("");
     $$('[data-pick-web]', listEl).forEach(b => b.onclick = () => showConfirmSection(webCandidates[Number(b.dataset.pickWeb)], Number(b.dataset.pickWeb)));
-    $$('[data-open-source]', listEl).forEach(b => b.onclick = () => { const c=webCandidates[Number(b.dataset.openSource)]; const u=c?.source_url||c?.url; if(u) window.vesper.openExternal?.(u); });
+    $$('[data-open-source]', listEl).forEach(b => b.onclick = () => { const c=webCandidates[Number(b.dataset.openSource)]; const u=c?.source_url||c?.url; if(u) window.procureflow.openExternal?.(u); });
   };
 
   // Clique para pesquisar online
@@ -2695,9 +2695,9 @@ function openCreate(prefill=""){
     progressText.textContent = "Consultando somente recursos gratuitos ou o servidor local configurado...";
 
     try {
-      const direct = await window.vesper.researchProduct?.(query);
+      const direct = await window.procureflow.researchProduct?.(query);
       if (direct?.available && Array.isArray(direct.candidates) && direct.candidates.length) {
-        webCandidates = direct.candidates.map(c => window.VesperIntelligence?.normalizeCandidate ? window.VesperIntelligence.normalizeCandidate(c, query) : c);
+        webCandidates = direct.candidates.map(c => window.ProcureFlowIntelligence?.normalizeCandidate ? window.ProcureFlowIntelligence.normalizeCandidate(c, query) : c);
         renderWebCandidates();
         return;
       }
@@ -2756,7 +2756,7 @@ function openCreate(prefill=""){
         throw new Error("Nenhum produto correspondente estruturado foi identificado.");
       }
 
-      webCandidates = webCandidates.map(c => window.VesperIntelligence?.normalizeCandidate ? window.VesperIntelligence.normalizeCandidate(c, query) : c);
+      webCandidates = webCandidates.map(c => window.ProcureFlowIntelligence?.normalizeCandidate ? window.ProcureFlowIntelligence.normalizeCandidate(c, query) : c);
       renderWebCandidates();
 
     } catch (e) {

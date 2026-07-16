@@ -4,7 +4,7 @@
  */
 (function (root, factory) {
   if (typeof module === "object" && module.exports) module.exports = factory(require("fflate"));
-  else root.VesperSpreadsheet = factory(root.fflate);
+  else root.ProcureFlowSpreadsheet = factory(root.fflate);
 })(typeof globalThis !== "undefined" ? globalThis : this, function (fflate) {
   "use strict";
   if (!fflate) throw new Error("fflate não foi carregado.");

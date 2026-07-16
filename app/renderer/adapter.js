@@ -1,6 +1,6 @@
 (function () {
-  if (window.vesper) return;
-  const DB_NAME = "vesper-compras-210",
+  if (window.procureflow) return;
+  const DB_NAME = "procureflow-compras-210",
     STORE = "data",
     KEY = "database",
     SNAP = "snapshots";
@@ -16,7 +16,7 @@
       .toLowerCase();
   const initial = () =>
     clone(
-      window.__VESPER_INITIAL_DATA__ || {
+      window.__PROCUREFLOW_INITIAL_DATA__ || {
         version: 15,
         schemaVersion: 15,
         appVersion: "2.2.0",
@@ -115,9 +115,9 @@
   }
   function findOld() {
     for (const k of [
-      "vesper-compras-db-v4",
-      "vesper-compras-db-v3",
-      "vesper-compras-db-v2",
+      "procureflow-compras-db-v4",
+      "procureflow-compras-db-v3",
+      "procureflow-compras-db-v2",
     ]) {
       try {
         const s = localStorage.getItem(k);
@@ -296,8 +296,8 @@
     return Number.isFinite(n) ? n : null;
   }
   function excelDate(v) {
-    if (typeof v === "number" && v > 30000 && window.VesperSpreadsheet) {
-      const d = VesperSpreadsheet.serialDate(v);
+    if (typeof v === "number" && v > 30000 && window.ProcureFlowSpreadsheet) {
+      const d = ProcureFlowSpreadsheet.serialDate(v);
       if (d)
         return `${d.y}-${String(d.m).padStart(2, "0")}-${String(d.d).padStart(2, "0")}`;
     }
@@ -356,9 +356,9 @@
     const extension = String(file.name || "").toLowerCase().split(".").pop();
     if (extension !== "xlsx") throw new Error("Escolha uma planilha .xlsx.");
     if (Number(file.size || 0) > 50 * 1024 * 1024) throw new Error("A planilha ultrapassa o limite seguro de 50 MB.");
-    const wb = VesperSpreadsheet.readWorkbook(await file.arrayBuffer());
-    if (!window.VesperCatalogImporter?.previewWorkbook) throw new Error("O importador seguro não foi carregado.");
-    const preview = window.VesperCatalogImporter.previewWorkbook(wb, db, { fileName: file.name, makeId: id });
+    const wb = ProcureFlowSpreadsheet.readWorkbook(await file.arrayBuffer());
+    if (!window.ProcureFlowCatalogImporter?.previewWorkbook) throw new Error("O importador seguro não foi carregado.");
+    const preview = window.ProcureFlowCatalogImporter.previewWorkbook(wb, db, { fileName: file.name, makeId: id });
     return { ok: true, fileName: file.name, preview };
   }
   async function exportXlsx(db) {
@@ -460,7 +460,7 @@
         ID: a.entityId,
       }),
     );
-    const bytes = VesperSpreadsheet.writeWorkbookBuffer([
+    const bytes = ProcureFlowSpreadsheet.writeWorkbookBuffer([
       { name: "Catálogo", rows: materials },
       { name: "Últimos 3 Preços", rows: last3 },
       { name: "Histórico de Preços", rows: history },
@@ -469,7 +469,7 @@
       { name: "Auditoria", rows: audit },
     ]);
     download(
-      `Vesper-Compras-${new Date().toISOString().slice(0, 10)}.xlsx`,
+      `ProcureFlow-Compras-${new Date().toISOString().slice(0, 10)}.xlsx`,
       bytes,
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     );
@@ -554,7 +554,7 @@
       const d = await loadData();
       await snapshot("manual");
       download(
-        `vesper-compras-backup-manual-${new Date().toISOString().replace(/[:.]/g, "-")}.json`,
+        `procureflow-compras-backup-manual-${new Date().toISOString().replace(/[:.]/g, "-")}.json`,
         JSON.stringify(d, null, 2),
       );
       return { ok: true, path: "Pasta Downloads" };
@@ -637,5 +637,5 @@
     listSnapshots,
   };
   ;
-  window.vesper = SERVER_MODE ? serverAdapter : localAdapter;
+  window.procureflow = SERVER_MODE ? serverAdapter : localAdapter;
 })();
