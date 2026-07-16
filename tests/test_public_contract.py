@@ -26,6 +26,7 @@ class PublicDemoContractTests(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        cls.main.wait_for_sqlite_rebuild()
         cls.temp.cleanup()
         sys.modules.pop("main", None)
 
@@ -45,6 +46,16 @@ class PublicDemoContractTests(unittest.TestCase):
         data = self.client.get("/api/data")
         self.assertEqual(data.status_code, 200)
         self.assertEqual(len(data.json()["data"]["products"]), 6)
+
+    def test_public_shell_is_branded_and_anonymized(self):
+        page = self.client.get("/")
+        self.assertEqual(page.status_code, 200)
+        self.assertIn("ProcureFlow", page.text)
+        self.assertNotIn("Vesper", page.text)
+
+        stylesheet = self.client.get("/styles.css")
+        self.assertEqual(stylesheet.status_code, 200)
+        self.assertIn("--navy", stylesheet.text)
 
     def test_revision_prevents_overwrite(self):
         original = self.client.get("/api/data").json()["data"]

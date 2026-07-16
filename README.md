@@ -1,10 +1,14 @@
 # ProcureFlow — do controle em planilha para um catálogo de compras compartilhado
 
+[![Validação](https://github.com/Mayconxzdev/PlanilhaCompras/actions/workflows/validate.yml/badge.svg)](https://github.com/Mayconxzdev/PlanilhaCompras/actions/workflows/validate.yml) [![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-2563eb.svg)](LICENSE) [![Versão de demonstração](https://img.shields.io/badge/vers%C3%A3o-v1.0.0--demo-172033.svg)](https://github.com/Mayconxzdev/PlanilhaCompras/releases/tag/v1.0.0-demo)
+
 ![Busca de materiais no ProcureFlow](assets/screenshots/01-search.png)
 
 **ProcureFlow** é uma demonstração sanitizada de um sistema que desenhei e implementei para substituir o controle de compras feito em planilhas compartilhadas. O objetivo não é substituir um ERP inteiro: é tornar a busca de materiais, o registro de preços, a consulta de fornecedores e o trabalho simultâneo mais confiáveis para quem compra no dia a dia.
 
 > Esta versão foi preparada para portfólio: todos os dados, fornecedores, valores, históricos, caminhos e imagens são fictícios ou demonstrativos. Nenhum dado operacional da empresa está neste repositório.
+
+**Leitura rápida para avaliação técnica:** problema operacional real, interface local para equipes de compras, API FastAPI, pesquisa SQLite/FTS5, proteção contra sobrescrita, backup e CI executando testes isolados.
 
 ## O problema
 
@@ -44,6 +48,8 @@ flowchart LR
 
 As imagens são capturas do aplicativo executando a massa de demonstração deste repositório, não ilustrações recriadas.
 
+O roteiro de uma demonstração objetiva, com resultados esperados e sem dados reais, está em [demo-walkthrough.md](docs/demo-walkthrough.md).
+
 ## Arquitetura e decisões
 
 | Decisão | Motivo |
@@ -55,7 +61,7 @@ As imagens são capturas do aplicativo executando a massa de demonstração dest
 | OCR e pesquisa externa opcionais | Ajudam no cadastro, mas não impedem a operação quando não estão configurados. |
 | Token administrativo para escrita | Em modo de rede, reset, backup e alteração exigem `PROCUREFLOW_ADMIN_TOKEN`. |
 
-Leia os detalhes em [architecture.md](docs/architecture.md), [security.md](docs/security.md) e [testing.md](docs/testing.md).
+Leia os detalhes em [architecture.md](docs/architecture.md), [security.md](docs/security.md), [testing.md](docs/testing.md) e na [política de segurança](SECURITY.md).
 
 ## Rodar a demonstração
 
@@ -80,6 +86,8 @@ node --check app/renderer/adapter.js
 ```
 
 Os testes usam diretório temporário e dados sintéticos. Eles nunca chamam a instalação operacional que inspirou o projeto.
+
+A versão de portfólio publicada está marcada como [v1.0.0-demo](https://github.com/Mayconxzdev/PlanilhaCompras/releases/tag/v1.0.0-demo). Consulte também o [CHANGELOG](CHANGELOG.md).
 
 ## Escopo e próximos passos
 

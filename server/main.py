@@ -1106,6 +1106,7 @@ BACKUP_DIR = Path(os.getenv("PROCUREFLOW_BACKUP_DIR", str(RUNTIME_DIR / "backups
 DATA_LOCK = threading.RLock()
 SQLITE_REBUILD_LOCK = threading.Lock()
 SQLITE_REBUILD_STATUS: Dict[str, Any] = {"state": "idle", "lastOk": None, "lastError": None}
+SQLITE_REBUILD_THREAD: Optional[threading.Thread] = None
 
 
 
@@ -1155,7 +1156,7 @@ def _rebuild_sqlite_from_server_data() -> Dict[str, Any]:
 
 
 def _rebuild_sqlite_background() -> None:
-    global SQLITE_REBUILD_STATUS
+    global SQLITE_REBUILD_STATUS, SQLITE_REBUILD_THREAD
     if not SQLITE_REBUILD_LOCK.acquire(blocking=False):
         SQLITE_REBUILD_STATUS = {**SQLITE_REBUILD_STATUS, "state": "queued"}
         return
@@ -1169,7 +1170,17 @@ def _rebuild_sqlite_background() -> None:
             SQLITE_REBUILD_STATUS = {"state": "idle", "lastOk": SQLITE_REBUILD_STATUS.get("lastOk"), "lastError": str(exc)}
         finally:
             SQLITE_REBUILD_LOCK.release()
-    threading.Thread(target=worker, name="procureflow-sqlite-rebuild", daemon=True).start()
+    SQLITE_REBUILD_THREAD = threading.Thread(target=worker, name="procureflow-sqlite-rebuild", daemon=True)
+    SQLITE_REBUILD_THREAD.start()
+
+
+def wait_for_sqlite_rebuild(timeout: float = 5.0) -> bool:
+    """Aguarda a reconstrução ativa do índice; útil para testes e encerramento limpo."""
+    thread = SQLITE_REBUILD_THREAD
+    if not thread:
+        return True
+    thread.join(timeout)
+    return not thread.is_alive()
 
 
 def _save_server_data(data: Dict[str, Any], label: str = "antes-salvar", expected_revision: Optional[int] = None, force: bool = False) -> Dict[str, Any]:
