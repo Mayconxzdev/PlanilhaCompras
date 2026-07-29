@@ -8,6 +8,12 @@
 
 > Esta versão foi preparada para portfólio: todos os dados, fornecedores, valores, históricos, caminhos e imagens são fictícios ou demonstrativos. Nenhum dado operacional da empresa está neste repositório.
 
+### Estado operacional
+
+A versão interna já é utilizada para registrar novos preços, localizar produtos e consultar o histórico de compras, inclusive como apoio à análise e acompanhamento do gestor.
+
+Esta edição pública reproduz o fluxo principal com dados, fornecedores, valores e infraestrutura fictícios, sem acessar a instalação operacional.
+
 **Leitura rápida para avaliação técnica:** problema operacional real, interface local para equipes de compras, API FastAPI, pesquisa SQLite/FTS5, proteção contra sobrescrita, backup e CI executando testes isolados.
 
 ## O problema
