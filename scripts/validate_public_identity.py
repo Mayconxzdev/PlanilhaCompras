@@ -9,7 +9,7 @@ OLD_NAME = "ProcureFlow"
 REQUIRED_FILES = {
     ROOT / "README.md": [CANONICAL, "usada diariamente por três usuários operacionais", "SQLite/FTS5"],
     ROOT / "app" / "renderer" / "index.html": [CANONICAL, "demonstração local"],
-    ROOT / "docs" / "architecture.md": [CANONICAL, "controle", "revision"],
+    ROOT / "docs" / "architecture.md": [CANONICAL, "concorrência", "revision"],
     ROOT / "docs" / "demo-walkthrough.md": [CANONICAL],
     ROOT / "tests" / "test_public_contract.py": [CANONICAL, "assertNotIn(\"ProcureFlow\", page.text)"],
 }
