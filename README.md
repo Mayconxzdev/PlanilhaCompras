@@ -1,75 +1,88 @@
-# ProcureFlow — do controle em planilha para um catálogo de compras compartilhado
+# Catálogo Operacional de Compras
 
-[![Validação](https://github.com/Mayconxzdev/PlanilhaCompras/actions/workflows/validate.yml/badge.svg)](https://github.com/Mayconxzdev/PlanilhaCompras/actions/workflows/validate.yml) [![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-2563eb.svg)](LICENSE) [![Versão de demonstração](https://img.shields.io/badge/vers%C3%A3o-v1.0.0--demo-172033.svg)](https://github.com/Mayconxzdev/PlanilhaCompras/releases/tag/v1.0.0-demo)
+[![Validação](https://github.com/Mayconxzdev/PlanilhaCompras/actions/workflows/validate.yml/badge.svg)](https://github.com/Mayconxzdev/PlanilhaCompras/actions/workflows/validate.yml) [![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-2563eb.svg)](LICENSE) [![Versão de demonstração](https://img.shields.io/badge/vers%C3%A3o-v1.1.0--demo-172033.svg)](CHANGELOG.md)
 
-![Busca de materiais no ProcureFlow](assets/screenshots/01-search.png)
+![Busca de materiais no Catálogo Operacional de Compras](assets/screenshots/01-search.png)
 
-**ProcureFlow** é uma demonstração sanitizada de um sistema que desenhei e implementei para substituir o controle de compras feito em planilhas compartilhadas. O objetivo não é substituir um ERP inteiro: é tornar a busca de materiais, o registro de preços, a consulta de fornecedores e o trabalho simultâneo mais confiáveis para quem compra no dia a dia.
+O **Catálogo Operacional de Compras** é a edição pública e sanitizada de um sistema interno que desenhei e implementei para substituir a consulta diária em uma planilha compartilhada. O produto organiza materiais, códigos, fornecedores, preços e histórico em uma interface de busca rápida, sem permitir que uma edição antiga sobrescreva silenciosamente o trabalho de outra pessoa.
 
-> Esta versão foi preparada para portfólio: todos os dados, fornecedores, valores, históricos, caminhos e imagens são fictícios ou demonstrativos. Nenhum dado operacional da empresa está neste repositório.
+> Todos os materiais, fornecedores, valores, históricos, caminhos e imagens desta publicação são fictícios ou demonstrativos. Nenhum dado operacional da empresa está neste repositório.
 
-### Estado operacional
+## Leitura rápida para recrutadores
 
-A versão interna já é utilizada para registrar novos preços, localizar produtos e consultar o histórico de compras, inclusive como apoio à análise e acompanhamento do gestor.
+| Dimensão | Evidência disponível |
+|---|---|
+| **Uso real** | A versão interna é usada diariamente por três usuários operacionais e consultada pela gestão. |
+| **Origem dos dados** | A implantação partiu de uma base histórica construída em planilha ao longo de aproximadamente dois anos, sem publicar contagens ou registros empresariais. |
+| **Busca operacional** | Pesquisa por código, nome, descrição técnica, medida, fornecedor, fabricante e termos relacionados. |
+| **Integridade** | Controle otimista por `revision`, backup antes de escritas sensíveis e conflito explícito entre edições simultâneas. |
+| **Arquitetura** | FastAPI, catálogo JSON versionado, SQLite/FTS5 como índice derivado, JavaScript e OCR opcional. |
+| **Qualidade pública** | Dados sintéticos, testes isolados, validação de identidade, sintaxe do frontend e GitHub Actions. |
 
-Esta edição pública reproduz o fluxo principal com dados, fornecedores, valores e infraestrutura fictícios, sem acessar a instalação operacional.
+## Problema resolvido
 
-**Leitura rápida para avaliação técnica:** problema operacional real, interface local para equipes de compras, API FastAPI, pesquisa SQLite/FTS5, proteção contra sobrescrita, backup e CI executando testes isolados.
+A planilha original reunia informação útil, mas a consulta exigia saber em qual aba, família ou descrição o material havia sido registrado. Quando mais de uma pessoa precisava consultar ou atualizar preços, também existia risco de sobrescrita e dificuldade para reconstruir o histórico.
 
-## O problema
+O sistema transforma essa rotina em um catálogo pesquisável:
 
-Uma planilha centraliza informação, mas começa a falhar quando mais pessoas precisam consultar ou atualizar preços: é difícil encontrar a descrição correta, não há prevenção de sobrescrita, o histórico fica disperso e o catálogo cresce sem padrão.
+```text
+Código, nome, fornecedor ou especificação
+                 ↓
+         busca unificada e FTS5
+                 ↓
+ material + histórico + último preço + fornecedor
+                 ↓
+ cadastro ou revisão com controle de concorrência
+                 ↓
+        backup + nova versão do catálogo
+```
 
-## O que construí
+## Capacidades demonstradas
 
-- Busca por nome, código, fornecedor, medida e sinônimos técnicos.
-- Cadastro guiado que separa descrição, especificações, marca, código e unidade.
-- Histórico de compras e último preço conhecido por item.
-- Detecção de conflito por revisão: uma alteração antiga não sobrescreve a edição de outro computador.
-- Backup automático antes de operações sensíveis e restauração controlada.
-- Índice SQLite com FTS5 reconstruído em segundo plano, sem travar o salvamento principal.
-- Importação/exportação de planilhas, leitura de código por câmera e OCR opcional.
-- Auditoria de preços, itens sem preço e fornecedores semelhantes.
-- Servidor FastAPI local e interface entregue pelo próprio servidor, sem SaaS obrigatório.
+- busca por código interno, nome, fornecedor, fabricante, medida e sinônimos técnicos;
+- cadastro guiado que separa descrição, especificações, marca, códigos, unidade e fornecedor;
+- histórico de compras e último preço conhecido por item;
+- conflito por revisão para impedir sobrescrita silenciosa entre computadores;
+- backup automático antes de operações sensíveis e restauração controlada;
+- índice SQLite FTS5 reconstruído em segundo plano a partir da fonte versionada;
+- importação e exportação de planilhas, leitura de código por câmera e OCR opcional;
+- auditoria de preços, itens incompletos e fornecedores semelhantes;
+- API FastAPI local e interface entregue pelo próprio servidor, sem SaaS obrigatório.
 
-## Fluxo que importa
+## Arquitetura
 
 ```mermaid
 flowchart LR
-  A[Comprador pesquisa ou registra item] --> B[Interface web responsiva]
-  B --> C[API FastAPI local]
-  C --> D[Catálogo JSON versionado]
-  C --> E[Backup antes da escrita]
-  C --> F[SQLite FTS5 em segundo plano]
-  D --> G{Revisão atual?}
-  G -- Sim --> H[Salva e incrementa revisão]
-  G -- Não --> I[Retorna conflito para recarregar]
+  U[Usuário] --> UI[Interface web responsiva]
+  UI --> API[FastAPI]
+  API --> JSON[Catálogo JSON + revision]
+  API --> BK[Backups versionados]
+  API --> IDX[SQLite FTS5 derivado]
+  API -. opcional .-> OCR[OCR / câmera]
 ```
 
-## Evidências do produto
-
-| Busca pensada para quem compra | Cadastro técnico assistido | Proteção contra conflito |
-| --- | --- | --- |
-| ![Tela de busca](assets/screenshots/01-search.png) | ![Cadastro de material](assets/screenshots/02-new-material.png) | ![Conflito entre computadores](assets/screenshots/03-conflict.png) |
-
-As imagens são capturas do aplicativo executando a massa de demonstração deste repositório, não ilustrações recriadas.
-
-O roteiro de uma demonstração objetiva, com resultados esperados e sem dados reais, está em [demo-walkthrough.md](docs/demo-walkthrough.md).
-
-## Arquitetura e decisões
+### Decisões que importam
 
 | Decisão | Motivo |
-| --- | --- |
-| FastAPI + interface estática | Implantação simples em PC Windows ou servidor local, sem serviço em nuvem obrigatório. |
-| JSON como fonte de gravação | Permite backup legível e recuperação simples para uma equipe não técnica. |
-| SQLite/FTS5 como índice derivado | Acelera a pesquisa sem tornar o índice a única fonte de verdade. |
-| Controle de `revision` | Evita que uma tela antiga substitua a mudança já feita por outra pessoa. |
-| OCR e pesquisa externa opcionais | Ajudam no cadastro, mas não impedem a operação quando não estão configurados. |
-| Token administrativo para escrita | Em modo de rede, reset, backup e alteração exigem `PROCUREFLOW_ADMIN_TOKEN`. |
+|---|---|
+| JSON como fonte de gravação | Mantém uma base legível, exportável e simples de recuperar na escala atual. |
+| SQLite/FTS5 como índice derivado | Acelera a pesquisa sem transformar o índice na única fonte de verdade. |
+| Controle de `revision` | Uma tela antiga recebe conflito em vez de apagar uma alteração mais recente. |
+| Backup antes da escrita | Reduz o risco operacional durante atualizações sensíveis. |
+| OCR e câmera opcionais | Ajudam no cadastro, mas a operação principal não depende desses recursos. |
+| Token administrativo fora da demo | Escritas em ambiente compartilhado exigem uma barreira explícita adicional. |
 
-Leia os detalhes em [architecture.md](docs/architecture.md), [security.md](docs/security.md), [testing.md](docs/testing.md) e na [política de segurança](SECURITY.md).
+Detalhes: [arquitetura](docs/architecture.md) · [segurança](docs/security.md) · [testes](docs/testing.md) · [roteiro de demonstração](docs/demo-walkthrough.md).
 
-## Rodar a demonstração
+## Evidências visuais
+
+| Busca operacional | Cadastro técnico | Conflito de edição |
+|---|---|---|
+| ![Tela de busca](assets/screenshots/01-search.png) | ![Cadastro de material](assets/screenshots/02-new-material.png) | ![Conflito entre computadores](assets/screenshots/03-conflict.png) |
+
+As imagens são capturas da aplicação executando a massa de demonstração deste repositório, não ilustrações recriadas.
+
+## Executar a demonstração
 
 Pré-requisitos: Python 3.11+ e PowerShell no Windows.
 
@@ -79,30 +92,32 @@ cd PlanilhaCompras
 .\scripts\run-demo.ps1
 ```
 
-Abra [http://127.0.0.1:8090](http://127.0.0.1:8090). O script cria `.runtime/` localmente a partir de `demo-data/seed.json`; nada dessa pasta deve ser versionado.
+Abra `http://127.0.0.1:8090`. O script cria uma cópia local de `demo-data/seed.json` em `.runtime/`, diretório ignorado pelo Git.
 
-Para uma implantação em rede, não use o modo demonstrativo. Consulte [setup.md](docs/setup.md) e configure um token administrativo antes de expor o serviço a outros computadores.
-
-## Validação
+## Validar
 
 ```powershell
 python -m unittest discover -s tests -v
+python scripts/validate_public_identity.py
 node --check app/renderer/app.js
 node --check app/renderer/adapter.js
+node --check app/renderer/enhancements.js
 ```
 
-Os testes usam diretório temporário e dados sintéticos. Eles nunca chamam a instalação operacional que inspirou o projeto.
+O GitHub Actions executa os mesmos contratos principais em cada push e pull request.
 
-A versão de portfólio publicada está marcada como [v1.0.0-demo](https://github.com/Mayconxzdev/PlanilhaCompras/releases/tag/v1.0.0-demo). Consulte também o [CHANGELOG](CHANGELOG.md).
+## Escopo e limites
 
-## Escopo e próximos passos
+O Catálogo Operacional de Compras resolve busca, registro e histórico na escala atual. Ele não é apresentado como ERP, módulo fiscal, plataforma de pagamentos ou operação empresarial de grande porte. Uma evolução de escala exigiria banco transacional central, identidade corporativa, autorização por papel, HTTPS, observabilidade e uma política de backup compatível com a organização.
 
-O projeto demonstra um caso de uso real e uma arquitetura local deliberadamente simples. Para uma operação com perfis, auditoria imutável e maior escala, a evolução natural é adicionar identidade corporativa, autorização por papel, banco transacional e observabilidade centralizada — sem perder o fluxo simples de quem compra.
+## Histórico de nome
+
+A primeira edição pública foi publicada como **ProcureFlow**. A partir da versão `v1.1.0-demo`, a identidade oficial passou a ser **Catálogo Operacional de Compras**, nome descritivo do problema empresarial atendido. O nome antigo permanece apenas no histórico de versão.
 
 ## Autor
 
-Desenvolvido por **Maycon Ferreira**. Projeto de portfólio baseado em um problema operacional real, publicado com dados e identidade completamente anonimizados.
+Desenvolvido por **Maycon Ferreira** como case de automação de processos, backend, busca operacional e integridade de dados para compras.
 
 ## Licença
 
-Código deste repositório sob licença [MIT](LICENSE). As bibliotecas de terceiros mantêm suas respectivas licenças; veja [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Código sob licença [MIT](LICENSE). Bibliotecas de terceiros mantêm suas próprias licenças; consulte [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

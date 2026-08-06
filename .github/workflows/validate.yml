@@ -8,9 +8,14 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: catalogo-operacional-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v6
@@ -23,6 +28,8 @@ jobs:
         run: pip install -r requirements.txt
       - name: Run isolated API contract tests
         run: python -m unittest discover -s tests -v
+      - name: Validate public product identity
+        run: python scripts/validate_public_identity.py
       - name: Check canonical frontend syntax
         run: |
           node --check app/renderer/app.js

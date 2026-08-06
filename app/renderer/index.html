@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' http://127.0.0.1:* http://localhost:*;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ProcureFlow — catálogo de compras</title>
+  <meta name="description" content="Catálogo operacional para pesquisar materiais, fornecedores, preços e histórico com controle de revisão.">
+  <title>Catálogo Operacional de Compras</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -12,20 +13,19 @@
   <div class="app-shell">
     <aside class="sidebar" aria-label="Menu principal">
       <div class="brand sidebar-brand">
-        <div class="brand-mark" aria-hidden="true">V</div>
-        <div><strong>Procure</strong><span>Flow</span></div>
+        <div class="brand-mark" aria-hidden="true">CO</div>
+        <div><strong>Catálogo</strong><span>Operacional</span></div>
       </div>
       <button class="sidebar-create" id="createBtn"><span aria-hidden="true">＋</span><span>Novo material</span></button>
       <nav id="nav" class="nav-list" aria-label="Navegação principal"></nav>
       <div class="sidebar-foot">
         <button class="text-button" id="helpBtn">Ajuda rápida</button>
-        <small class="app-version">ProcureFlow • demonstração local</small>
+        <small class="app-version">Catálogo Operacional de Compras • demonstração local</small>
       </div>
     </aside>
     <main class="main">
       <header class="topbar">
         <div class="top-title-wrap">
-
           <strong id="topTitle">Buscar e registrar</strong>
         </div>
         <div class="topbar-actions">
