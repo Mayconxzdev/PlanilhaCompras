@@ -1,10 +1,10 @@
 # Catálogo Operacional de Compras
 
-[![Validação](https://github.com/Mayconxzdev/PlanilhaCompras/actions/workflows/validate.yml/badge.svg)](https://github.com/Mayconxzdev/PlanilhaCompras/actions/workflows/validate.yml) [![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-2563eb.svg)](LICENSE) [![Versão de demonstração](https://img.shields.io/badge/vers%C3%A3o-v1.1.0--demo-172033.svg)](CHANGELOG.md)
+[![Validação](https://github.com/Mayconxzdev/CatalogoOperacional/actions/workflows/validate.yml/badge.svg)](https://github.com/Mayconxzdev/CatalogoOperacional/actions/workflows/validate.yml) [![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-2563eb.svg)](LICENSE) [![Versão de demonstração](https://img.shields.io/badge/vers%C3%A3o-v1.1.0--demo-172033.svg)](CHANGELOG.md)
 
 ![Busca de materiais no Catálogo Operacional de Compras](assets/screenshots/01-search.png)
 
-O **Catálogo Operacional de Compras** é a edição pública e sanitizada de um sistema interno que desenhei e implementei para substituir a consulta diária em uma planilha compartilhada. O produto organiza materiais, códigos, fornecedores, preços e histórico em uma interface de busca rápida, sem permitir que uma edição antiga sobrescreva silenciosamente o trabalho de outra pessoa.
+O **Catálogo Operacional de Compras** é a edição pública e sanitizada de um sistema interno que desenhei e implementei para substituir a consulta diária em uma planilha compartilhada. A versão interna organiza uma base histórica com **24 categorias operacionais e mais de 480 códigos de materiais**, permitindo pesquisar materiais, fornecedores, preços e histórico sem que uma edição antiga sobrescreva silenciosamente o trabalho de outra pessoa.
 
 > Todos os materiais, fornecedores, valores, históricos, caminhos e imagens desta publicação são fictícios ou demonstrativos. Nenhum dado operacional da empresa está neste repositório.
 
@@ -13,7 +13,7 @@ O **Catálogo Operacional de Compras** é a edição pública e sanitizada de um
 | Dimensão | Evidência disponível |
 |---|---|
 | **Uso real** | A versão interna é usada diariamente por três usuários operacionais e consultada pela gestão. |
-| **Origem dos dados** | A implantação partiu de uma base histórica construída em planilha ao longo de aproximadamente dois anos, sem publicar contagens ou registros empresariais. |
+| **Escala da base** | 24 categorias operacionais e mais de 480 códigos de materiais, derivados de uma planilha cultivada por aproximadamente dois anos. |
 | **Busca operacional** | Pesquisa por código, nome, descrição técnica, medida, fornecedor, fabricante e termos relacionados. |
 | **Integridade** | Controle otimista por `revision`, backup antes de escritas sensíveis e conflito explícito entre edições simultâneas. |
 | **Arquitetura** | FastAPI, catálogo JSON versionado, SQLite/FTS5 como índice derivado, JavaScript e OCR opcional. |
@@ -87,8 +87,8 @@ As imagens são capturas da aplicação executando a massa de demonstração des
 Pré-requisitos: Python 3.11+ e PowerShell no Windows.
 
 ```powershell
-git clone https://github.com/Mayconxzdev/PlanilhaCompras.git
-cd PlanilhaCompras
+git clone https://github.com/Mayconxzdev/CatalogoOperacional.git
+cd CatalogoOperacional
 .\scripts\run-demo.ps1
 ```
 
