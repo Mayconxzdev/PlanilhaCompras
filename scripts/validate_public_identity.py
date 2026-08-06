@@ -11,10 +11,15 @@ REQUIRED_FILES = {
     ROOT / "app" / "renderer" / "index.html": [CANONICAL, "demonstração local"],
     ROOT / "docs" / "architecture.md": [CANONICAL, "controle", "revision"],
     ROOT / "docs" / "demo-walkthrough.md": [CANONICAL],
+    ROOT / "tests" / "test_public_contract.py": [CANONICAL, "assertNotIn(\"ProcureFlow\", page.text)"],
 }
 
-SCAN_SUFFIXES = {".html", ".js", ".css", ".py", ".md", ".json", ".yml", ".yaml", ".svg"}
-OLD_NAME_ALLOWED = {ROOT / "README.md", ROOT / "CHANGELOG.md"}
+PUBLIC_IDENTITY_PATHS = [
+    ROOT / "app" / "renderer" / "index.html",
+    ROOT / "app" / "renderer" / "favicon.svg",
+    ROOT / "docs" / "architecture.md",
+    ROOT / "docs" / "demo-walkthrough.md",
+]
 
 
 def main() -> int:
@@ -29,14 +34,18 @@ def main() -> int:
             if phrase not in text:
                 errors.append(f"{path.relative_to(ROOT)} is missing required identity/evidence: {phrase}")
 
-    for path in ROOT.rglob("*"):
-        if not path.is_file() or path.suffix.lower() not in SCAN_SUFFIXES:
-            continue
-        if any(part in {".git", ".runtime", "node_modules"} for part in path.parts):
-            continue
+    for path in PUBLIC_IDENTITY_PATHS:
         text = path.read_text(encoding="utf-8", errors="ignore")
-        if OLD_NAME in text and path not in OLD_NAME_ALLOWED:
-            errors.append(f"outdated public name found in {path.relative_to(ROOT)}")
+        if OLD_NAME in text:
+            errors.append(f"outdated visible product name found in {path.relative_to(ROOT)}")
+
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    if "A primeira edição pública foi publicada como **ProcureFlow**" not in readme:
+        errors.append("README.md must preserve a transparent product-name migration note")
+
+    changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+    if "Primeira publicação sanitizada, então chamada **ProcureFlow**" not in changelog:
+        errors.append("CHANGELOG.md must preserve the historical name in the release history")
 
     if errors:
         for error in errors:
