@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 
 
 ROOT = Path(__file__).resolve().parents[1]
+PUBLIC_NAME = "Catálogo Operacional de Compras"
 
 
 class PublicDemoContractTests(unittest.TestCase):
@@ -50,8 +51,10 @@ class PublicDemoContractTests(unittest.TestCase):
     def test_public_shell_is_branded_and_anonymized(self):
         page = self.client.get("/")
         self.assertEqual(page.status_code, 200)
-        self.assertIn("ProcureFlow", page.text)
+        self.assertIn(PUBLIC_NAME, page.text)
+        self.assertNotIn("ProcureFlow", page.text)
         self.assertNotIn("Vesper", page.text)
+        self.assertIn("demonstração local", page.text)
 
         stylesheet = self.client.get("/styles.css")
         self.assertEqual(stylesheet.status_code, 200)
